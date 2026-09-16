@@ -187,7 +187,38 @@
                 grid-template-columns: 1fr;
             }
         }
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 100px;
+}
 
+.action-buttons button {
+    width: 70px;
+    padding: 7px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.action-buttons .edit-btn {
+    background-color: #f59e0b;
+    color: white;
+}
+
+.action-buttons .delete-btn {
+    background-color: #dc2626;
+    color: white;
+}
+
+.action-buttons button:hover {
+    opacity: 0.85;
+}
     </style>
 </head>
 
@@ -514,7 +545,8 @@
             </tr>
         </thead>
 
-        <tbody id="applicationTableBody">
+       
+            documen <tbody id="applicationTableBody">
         </tbody>
     </table>
 </div>
@@ -522,10 +554,225 @@
 
 </div>
 
+loadApplications();
 
 <script>
 
     const API_URL = "/api/students";
+    const APPLICATION_API_URL = "/api/applications";
+
+let applicationEditMode = false;
+
+async function loadApplications() {
+
+    try {
+
+        const response = await fetch(APPLICATION_API_URL);
+
+        if (!response.ok) {
+            throw new Error("Failed to load applications");
+        }
+
+        const applications = await response.json();
+
+        const tableBody =
+            document.getElementById("applicationTableBody");
+
+        tableBody.innerHTML = "";
+
+        applications.forEach(application => {
+
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+                <td>${application.id}</td>
+                <td>${application.studentName}</td>
+                <td>${application.jobTitle}</td>
+                <td>${application.companyName}</td>
+                <td>${application.appliedDate}</td>
+                <td>${application.status}</td>
+
+                <td>
+                    <div class="action-buttons">
+
+                        <button
+                            class="edit-btn"
+                            onclick="editApplication(${application.id})">
+                            Edit
+                        </button>
+
+                        <button
+                            class="delete-btn"
+                            onclick="deleteApplication(${application.id})">
+                            Delete
+                        </button>
+
+                    </div>
+                </td>
+            `;
+
+            tableBody.appendChild(row);
+        });
+
+    } catch (error) {
+
+        console.error("Error loading applications:", error);
+
+    }
+}
+async function editApplication(id) {
+
+    try {
+
+        const response =
+            await fetch(`${APPLICATION_API_URL}/${id}`);
+
+        if (!response.ok) {
+            throw new Error("Failed to load application");
+        }
+
+        const application = await response.json();
+
+        document.getElementById("applicationId").value =
+            application.id;
+
+        document.getElementById("applicationStudentName").value =
+            application.studentName;
+
+        document.getElementById("applicationJobTitle").value =
+            application.jobTitle;
+
+        document.getElementById("applicationCompanyName").value =
+            application.companyName;
+
+        document.getElementById("applicationAppliedDate").value =
+            application.appliedDate;
+
+        document.getElementById("applicationStatus").value =
+            application.status;
+
+        applicationEditMode = true;
+
+        document.getElementById("applicationSubmitButton").textContent =
+            "Update Application";
+
+        document.getElementById("applicationCancelButton").style.display =
+            "inline-block";
+
+        document.getElementById("applicationForm")
+            .scrollIntoView({ behavior: "smooth" });
+
+    } catch (error) {
+
+        console.error("Error editing application:", error);
+
+    }
+}
+async function deleteApplication(id) {
+
+    if (!confirm("Are you sure you want to delete this application?")) {
+        return;
+    }
+
+    try {
+
+        const response = await fetch(
+            `${APPLICATION_API_URL}/${id}`,
+            {
+                method: "DELETE"
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error("Failed to delete application");
+        }
+
+        alert("Application deleted successfully!");
+
+        loadApplications();
+
+    } catch (error) {
+
+        console.error("Error deleting application:", error);
+
+    }
+}
+document
+    .getElementById("applicationForm")
+    .addEventListener("submit", async function(event) {
+
+        event.preventDefault();
+
+        const id =
+            document.getElementById("applicationId").value;
+
+        const application = {
+            studentName:
+                document.getElementById("applicationStudentName").value,
+
+            jobTitle:
+                document.getElementById("applicationJobTitle").value,
+
+            companyName:
+                document.getElementById("applicationCompanyName").value,
+
+            appliedDate:
+                document.getElementById("applicationAppliedDate").value,
+
+            status:
+                document.getElementById("applicationStatus").value
+        };
+
+        try {
+
+            let response;
+
+            if (applicationEditMode) {
+
+                response = await fetch(
+                    `${APPLICATION_API_URL}/${id}`,
+                    {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(application)
+                    }
+                );
+
+            } else {
+
+                response = await fetch(
+                    APPLICATION_API_URL,
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(application)
+                    }
+                );
+            }
+
+            if (!response.ok) {
+                throw new Error("Failed to save application");
+            }
+
+            alert(
+                applicationEditMode
+                    ? "Application updated successfully!"
+                    : "Application added successfully!"
+            );
+
+            cancelApplicationEdit();
+            loadApplications();
+
+        } catch (error) {
+
+            console.error("Error saving application:", error);
+
+        }
+    });
 
     let editMode = false;
 
@@ -564,18 +811,20 @@
                     <td>${student.skills}</td>
 
                     <td>
-                        <button
-                            class="edit-btn"
-                            onclick="editStudent(${student.id})">
-                            Edit
-                        </button>
+    <div class="action-buttons">
+        <button
+            class="edit-btn"
+            onclick="editStudent(${student.id})">
+            Edit
+        </button>
 
-                        <button
-                            class="delete-btn"
-                            onclick="deleteStudent(${student.id})">
-                            Delete
-                        </button>
-                    </td>
+        <button
+            class="delete-btn"
+            onclick="deleteStudent(${student.id})">
+            Delete
+        </button>
+    </div>
+</td>
                 `;
 
                 tableBody.appendChild(row);
@@ -741,8 +990,7 @@
 
             document.getElementById("email").value =
                 student.email;
-
-            document.getElementById("phone").value =
+t.getElementById("phone").value =
                 student.phone;
 
             document.getElementById("course").value =
@@ -933,25 +1181,28 @@
 
             companies.forEach(company => {
                 const row = document.createElement("tr");
-
-                row.innerHTML = `
-                    <td>${company.id}</td>
-                    <td>${company.companyName}</td>
-                    <td>${company.email}</td>
+     <td>${company.email}</td>
                     <td>${company.phone}</td>
                     <td>${company.location}</td>
                     <td>${company.website || ""}</td>
                     <td>${company.jobRole}</td>
-                    <td>
-                        <button class="edit-btn"
-                                onclick="editCompany(${company.id})">
-                            Edit
-                        </button>
-                        <button class="delete-btn"
-                                onclick="deleteCompany(${company.id})">
-                            Delete
-                        </button>
-                    </td>
+             <td>
+                row.innerHTML = `
+                    <td>${company.id}</td>
+                    <td>${company.companyName}</td>
+               
+    <div class="action-buttons">
+        <button class="edit-btn"
+                onclick="editCompany(${company.id})">
+            Edit
+        </button>
+
+        <button class="delete-btn"
+                onclick="deleteCompany(${company.id})">
+            Delete
+        </button>
+    </div>
+</td>
                 `;
 
                 tableBody.appendChild(row);
