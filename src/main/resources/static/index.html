@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Student Placement Management System</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f4f6f8;
+        }
+
+        header {
+            background: #1f2937;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1100px;
+            margin: 30px auto;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            color: #1f2937;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 15px;
+        }
+
+        button {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 5px;
+        }
+
+        #submitBtn {
+            background: #2563eb;
+            color: white;
+        }
+
+        #cancelBtn {
+            background: #6b7280;
+            color: white;
+            display: none;
+        }
+
+        .edit-btn {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .delete-btn {
+            background: #dc2626;
+            color: white;
+        }
+
+        button:hover {
+            opacity: 0.85;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background: #1f2937;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background: #f9fafb;
+        }
+
+        .message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        @media (max-width: 768px) {
+            table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+
+        /* =========================
+           COMPANY SECTION
+           ========================= */
+
+        .company-card {
+            margin-top: 25px;
+        }
+
+        .company-form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .company-form-grid .form-group {
+            margin-bottom: 0;
+        }
+
+        /* =========================
+           JOB SECTION
+           ========================= */
+
+        .job-card {
+            margin-top: 25px;
+        }
+
+        .job-form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .job-form-grid .form-group {
+            margin-bottom: 0;
+        }
+
+        @media (max-width: 768px) {
+            .company-form-grid,
+            .job-form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Student Placement Management System</h1>
+    <p>Manage Student Records</p>
+</header>
+
+<div class="container">
+
+    <!-- Student Form -->
+    <div class="card">
+
+        <h2 id="formTitle">Add Student</h2>
+
+        <form id="studentForm">
+
+            <input type="hidden" id="studentId">
+
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" placeholder="Enter student name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" placeholder="Enter email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Phone</label>
+                <input type="text" id="phone" placeholder="Enter phone number" required>
+            </div>
+
+            <div class="form-group">
+                <label for="course">Course</label>
+                <input type="text" id="course" placeholder="Enter course" required>
+            </div>
+
+            <div class="form-group">
+                <label for="skills">Skills</label>
+                <input type="text" id="skills" placeholder="Java, Python, MySQL" required>
+            </div>
+
+            <button type="submit" id="submitBtn">
+                Add Student
+            </button>
+
+            <button type="button" id="cancelBtn" onclick="cancelEdit()">
+                Cancel
+            </button>
+
+        </form>
+
+        <div id="message" class="message"></div>
+
+    </div>
+
+
+    <!-- Student List -->
+    <div class="card">
+
+        <h2>Student List</h2>
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Course</th>
+                    <th>Skills</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody id="studentTableBody">
+                <!-- Students will appear here -->
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+    <!-- Company Management -->
+    <div class="card company-card">
+
+        <h2 id="companyFormTitle">Add Company</h2>
+
+        <form id="companyForm">
+
+            <input type="hidden" id="companyId">
+
+            <div class="company-form-grid">
+
+                <div class="form-group">
+                    <label for="companyName">Company Name</label>
+                    <input type="text" id="companyName" placeholder="TCS" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="companyEmail">Email</label>
+                    <input type="email" id="companyEmail" placeholder="hr@tcs.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="companyPhone">Phone</label>
+                    <input type="text" id="companyPhone" placeholder="9876543210" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="companyLocation">Location</label>
+                    <input type="text" id="companyLocation" placeholder="Noida" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="companyWebsite">Website</label>
+                    <input type="url" id="companyWebsite" placeholder="https://www.tcs.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="jobRole">Job Role</label>
+                    <input type="text" id="jobRole" placeholder="Java Developer" required>
+                </div>
+
+            </div>
+
+            <br>
+
+            <button type="submit" id="companySubmitBtn">Add Company</button>
+
+            <button type="button" id="companyCancelBtn"
+                    onclick="cancelCompanyEdit()"
+                    style="display:none;">
+                Cancel
+            </button>
+
+        </form>
+
+        <div id="companyMessage" class="message"></div>
+
+    </div>
+
+    <!-- Company List -->
+    <div class="card company-card">
+
+        <h2>Company List</h2>
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Company Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Location</th>
+                    <th>Website</th>
+                    <th>Job Role</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody id="companyTableBody"></tbody>
+
+        </table>
+
+    </div>
+
+
+    <!-- Job Management -->
+    <div class="card job-card">
+
+        <h2 id="jobFormTitle">Add Job</h2>
+
+        <form id="jobForm">
+
+            <input type="hidden" id="jobId">
+
+            <div class="job-form-grid">
+
+                <div class="form-group">
+                    <label for="jobTitle">Job Title</label>
+                    <input type="text" id="jobTitle" placeholder="Java Developer" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="jobCompanyName">Company Name</label>
+                    <input type="text" id="jobCompanyName" placeholder="TCS" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="jobLocation">Location</label>
+                    <input type="text" id="jobLocation" placeholder="Noida" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="jobSalary">Salary</label>
+                    <input type="text" id="jobSalary" placeholder="5 LPA" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="jobType">Job Type</label>
+                    <input type="text" id="jobType" placeholder="Full Time" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="requiredSkills">Required Skills</label>
+                    <input type="text" id="requiredSkills" placeholder="Java, Spring Boot, MySQL" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="lastDate">Last Date to Apply</label>
+                    <input type="date" id="lastDate" required>
+                </div>
+
+            </div>
+
+            <br>
+
+            <button type="submit" id="jobSubmitBtn">Add Job</button>
+
+            <button type="button" id="jobCancelBtn"
+                    onclick="cancelJobEdit()"
+                    style="display:none;">
+                Cancel
+            </button>
+
+        </form>
+
+        <div id="jobMessage" class="message"></div>
+
+    </div>
+
+    <!-- Job List -->
+    <div class="card job-card">
+
+        <h2>Job List</h2>
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Job Title</th>
+                    <th>Company</th>
+                    <th>Location</th>
+                    <th>Salary</th>
+                    <th>Job Type</th>
+                    <th>Skills</th>
+                    <th>Last Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody id="jobTableBody"></tbody>
+
+        </table>
+<!-- APPLICATION MANAGEMENT -->
+
+<div class="section">
+    <h2>Application Management</h2>
+
+    <form id="applicationForm">
+
+        <input type="hidden" id="applicationId">
+
+        <label>Student Name</label>
+        <input type="text" id="applicationStudentName"
+               placeholder="Enter student name" required>
+
+        <label>Job Title</label>
+        <input type="text" id="applicationJobTitle"
+               placeholder="Enter job title" required>
+
+        <label>Company Name</label>
+        <input type="text" id="applicationCompanyName"
+               placeholder="Enter company name" required>
+
+        <label>Applied Date</label>
+        <input type="date" id="applicationAppliedDate" required>
+
+        <label>Status</label>
+        <select id="applicationStatus" required>
+            <option value="">Select Status</option>
+            <option value="Applied">Applied</option>
+            <option value="Shortlisted">Shortlisted</option>
+            <option value="Selected">Selected</option>
+            <option value="Rejected">Rejected</option>
+        </select>
+
+        <button type="submit" id="applicationSubmitButton">
+            Add Application
+        </button>
+
+        <button type="button"
+                id="applicationCancelButton"
+                onclick="cancelApplicationEdit()"
+                style="display:none;">
+            Cancel
+        </button>
+
+    </form>
+
+    <p id="applicationMessage"></p>
+
+    <h3>Application List</h3>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Student Name</th>
+                <th>Job Title</th>
+                <th>Company Name</th>
+                <th>Applied Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody id="applicationTableBody">
+        </tbody>
+    </table>
+</div>
+    </div>
+
+</div>
+
+
+<script>
+
+    const API_URL = "/api/students";
+
+    let editMode = false;
+
+
+    // =========================
+    // LOAD ALL STUDENTS
+    // =========================
+
+    async function loadStudents() {
+
+        try {
+
+            const response = await fetch(API_URL);
+
+            if (!response.ok) {
+                throw new Error("Failed to load students");
+            }
+
+            const students = await response.json();
+
+            const tableBody =
+                document.getElementById("studentTableBody");
+
+            tableBody.innerHTML = "";
+
+            students.forEach(student => {
+
+                const row = document.createElement("tr");
+
+                row.innerHTML = `
+                    <td>${student.id}</td>
+                    <td>${student.name}</td>
+                    <td>${student.email}</td>
+                    <td>${student.phone}</td>
+                    <td>${student.course}</td>
+                    <td>${student.skills}</td>
+
+                    <td>
+                        <button
+                            class="edit-btn"
+                            onclick="editStudent(${student.id})">
+                            Edit
+                        </button>
+
+                        <button
+                            class="delete-btn"
+                            onclick="deleteStudent(${student.id})">
+                            Delete
+                        </button>
+                    </td>
+                `;
+
+                tableBody.appendChild(row);
+
+            });
+
+        } catch (error) {
+
+            console.error(error);
+
+            showMessage(
+                "Students load nahi ho paaye!",
+                "error"
+            );
+        }
+    }
+
+
+    // =========================
+    // ADD / UPDATE STUDENT
+    // =========================
+
+    document
+        .getElementById("studentForm")
+        .addEventListener("submit", async function(event) {
+
+            event.preventDefault();
+
+            const id =
+                document.getElementById("studentId").value;
+
+            const student = {
+
+                name:
+                    document.getElementById("name").value,
+
+                email:
+                    document.getElementById("email").value,
+
+                phone:
+                    document.getElementById("phone").value,
+
+                course:
+                    document.getElementById("course").value,
+
+                skills:
+                    document.getElementById("skills").value
+            };
+
+
+            try {
+
+                let response;
+
+                // UPDATE
+                if (editMode) {
+
+                    response = await fetch(
+                        `${API_URL}/${id}`,
+                        {
+                            method: "PUT",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body: JSON.stringify(student)
+                        }
+                    );
+
+                }
+
+                // ADD
+                else {
+
+                    response = await fetch(
+                        API_URL,
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body: JSON.stringify(student)
+                        }
+                    );
+                }
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "Request failed"
+                    );
+                }
+
+
+                if (editMode) {
+
+                    showMessage(
+                        "Student updated successfully!",
+                        "success"
+                    );
+
+                } else {
+
+                    showMessage(
+                        "Student added successfully!",
+                        "success"
+                    );
+                }
+
+
+                resetForm();
+
+                loadStudents();
+
+            } catch (error) {
+
+                console.error(error);
+
+                showMessage(
+                    "Operation failed!",
+                    "error"
+                );
+            }
+
+        });
+
+
+    // =========================
+    // EDIT STUDENT
+    // =========================
+
+    async function editStudent(id) {
+
+        try {
+
+            const response =
+                await fetch(`${API_URL}/${id}`);
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "Student data load nahi hua"
+                );
+            }
+
+
+            const student =
+                await response.json();
+
+
+            document.getElementById("studentId").value =
+                student.id;
+
+            document.getElementById("name").value =
+                student.name;
+
+            document.getElementById("email").value =
+                student.email;
+
+            document.getElementById("phone").value =
+                student.phone;
+
+            document.getElementById("course").value =
+                student.course;
+
+            document.getElementById("skills").value =
+                student.skills;
+
+
+            editMode = true;
+
+
+            document.getElementById("formTitle").innerText =
+                "Update Student";
+
+            document.getElementById("submitBtn").innerText =
+                "Update Student";
+
+            document.getElementById("cancelBtn").style.display =
+                "inline-block";
+
+
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+
+
+        } catch (error) {
+
+            console.error(error);
+
+            showMessage(
+                "Student data load nahi hua!",
+                "error"
+            );
+        }
+    }
+
+
+    // =========================
+    // DELETE STUDENT
+    // =========================
+
+    async function deleteStudent(id) {
+
+        const confirmDelete =
+            confirm(
+                "Are you sure you want to delete this student?"
+            );
+
+
+        if (!confirmDelete) {
+            return;
+        }
+
+
+        try {
+
+            const response =
+                await fetch(
+                    `${API_URL}/${id}`,
+                    {
+                        method: "DELETE"
+                    }
+                );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "Delete failed"
+                );
+            }
+
+
+            showMessage(
+                "Student deleted successfully!",
+                "success"
+            );
+
+
+            loadStudents();
+
+
+        } catch (error) {
+
+            console.error(error);
+
+            showMessage(
+                "Student delete nahi hua!",
+                "error"
+            );
+        }
+    }
+
+
+    // =========================
+    // CANCEL EDIT
+    // =========================
+
+    function cancelEdit() {
+
+        resetForm();
+
+    }
+
+
+    // =========================
+    // RESET FORM
+    // =========================
+
+    function resetForm() {
+
+        document
+            .getElementById("studentForm")
+            .reset();
+
+
+        document.getElementById("studentId").value =
+            "";
+
+
+        editMode = false;
+
+
+        document.getElementById("formTitle").innerText =
+            "Add Student";
+
+        document.getElementById("submitBtn").innerText =
+            "Add Student";
+
+        document.getElementById("cancelBtn").style.display =
+            "none";
+    }
+
+
+    // =========================
+    // MESSAGE
+    // =========================
+
+    function showMessage(text, type) {
+
+        const message =
+            document.getElementById("message");
+
+
+        message.innerText = text;
+
+        message.className =
+            "message " + type;
+
+        message.style.display =
+            "block";
+
+
+        setTimeout(function() {
+
+            message.style.display =
+                "none";
+
+        }, 3000);
+    }
+
+
+    // =========================
+    // PAGE LOAD
+    // =========================
+
+    loadStudents();
+
+
+    // =========================
+    // COMPANY MANAGEMENT
+    // =========================
+
+    const COMPANY_API_URL = "/api/companies";
+    let companyEditMode = false;
+
+    async function loadCompanies() {
+        try {
+            const response = await fetch(COMPANY_API_URL);
+            if (!response.ok) throw new Error("Failed to load companies");
+
+            const companies = await response.json();
+            const tableBody = document.getElementById("companyTableBody");
+            tableBody.innerHTML = "";
+
+            companies.forEach(company => {
+                const row = document.createElement("tr");
+
+                row.innerHTML = `
+                    <td>${company.id}</td>
+                    <td>${company.companyName}</td>
+                    <td>${company.email}</td>
+                    <td>${company.phone}</td>
+                    <td>${company.location}</td>
+                    <td>${company.website || ""}</td>
+                    <td>${company.jobRole}</td>
+                    <td>
+                        <button class="edit-btn"
+                                onclick="editCompany(${company.id})">
+                            Edit
+                        </button>
+                        <button class="delete-btn"
+                                onclick="deleteCompany(${company.id})">
+                            Delete
+                        </button>
+                    </td>
+                `;
+
+                tableBody.appendChild(row);
+            });
+
+        } catch (error) {
+            console.error(error);
+            showCompanyMessage("Companies load nahi ho paaye!", "error");
+        }
+    }
+
+    document.getElementById("companyForm")
+        .addEventListener("submit", async function(event) {
+
+        event.preventDefault();
+
+        const id = document.getElementById("companyId").value;
+
+        const company = {
+            companyName: document.getElementById("companyName").value,
+            email: document.getElementById("companyEmail").value,
+            phone: document.getElementById("companyPhone").value,
+            location: document.getElementById("companyLocation").value,
+            website: document.getElementById("companyWebsite").value,
+            jobRole: document.getElementById("jobRole").value
+        };
+
+        try {
+            let response;
+
+            if (companyEditMode) {
+                response = await fetch(`${COMPANY_API_URL}/${id}`, {
+                    method: "PUT",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify(company)
+                });
+            } else {
+                response = await fetch(COMPANY_API_URL, {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify(company)
+                });
+            }
+
+            if (!response.ok) throw new Error("Company request failed");
+
+            showCompanyMessage(
+                companyEditMode
+                    ? "Company updated successfully!"
+                    : "Company added successfully!",
+                "success"
+            );
+
+            resetCompanyForm();
+            loadCompanies();
+
+        } catch (error) {
+            console.error(error);
+            showCompanyMessage("Company operation failed!", "error");
+        }
+    });
+
+    async function editCompany(id) {
+        try {
+            const response = await fetch(`${COMPANY_API_URL}/${id}`);
+            if (!response.ok) throw new Error("Company data load failed");
+
+            const company = await response.json();
+
+            document.getElementById("companyId").value = company.id;
+            document.getElementById("companyName").value = company.companyName;
+            document.getElementById("companyEmail").value = company.email;
+            document.getElementById("companyPhone").value = company.phone;
+            document.getElementById("companyLocation").value = company.location;
+            document.getElementById("companyWebsite").value = company.website || "";
+            document.getElementById("jobRole").value = company.jobRole;
+
+            companyEditMode = true;
+
+            document.getElementById("companyFormTitle").innerText = "Update Company";
+            document.getElementById("companySubmitBtn").innerText = "Update Company";
+            document.getElementById("companyCancelBtn").style.display = "inline-block";
+
+            window.scrollTo({
+                top: document.querySelector(".company-card").offsetTop - 20,
+                behavior: "smooth"
+            });
+
+        } catch (error) {
+            console.error(error);
+            showCompanyMessage("Company data load nahi hua!", "error");
+        }
+    }
+
+    async function deleteCompany(id) {
+        if (!confirm("Are you sure you want to delete this company?")) return;
+
+        try {
+            const response = await fetch(`${COMPANY_API_URL}/${id}`, {
+                method: "DELETE"
+            });
+
+            if (!response.ok) throw new Error("Company delete failed");
+
+            showCompanyMessage("Company deleted successfully!", "success");
+            loadCompanies();
+
+        } catch (error) {
+            console.error(error);
+            showCompanyMessage("Company delete nahi hua!", "error");
+        }
+    }
+
+    function cancelCompanyEdit() {
+        resetCompanyForm();
+    }
+
+    function resetCompanyForm() {
+        document.getElementById("companyForm").reset();
+        document.getElementById("companyId").value = "";
+        companyEditMode = false;
+
+        document.getElementById("companyFormTitle").innerText = "Add Company";
+        document.getElementById("companySubmitBtn").innerText = "Add Company";
+        document.getElementById("companyCancelBtn").style.display = "none";
+    }
+
+    function showCompanyMessage(text, type) {
+        const message = document.getElementById("companyMessage");
+        message.innerText = text;
+        message.className = "message " + type;
+        message.style.display = "block";
+
+        setTimeout(function() {
+            message.style.display = "none";
+        }, 3000);
+    }
+
+
+    // =========================
+    // JOB MANAGEMENT
+    // =========================
+
+    const JOB_API_URL = "/api/jobs";
+    let jobEditMode = false;
+
+    async function loadJobs() {
+        try {
+            const response = await fetch(JOB_API_URL);
+            if (!response.ok) throw new Error("Failed to load jobs");
+
+            const jobs = await response.json();
+            const tableBody = document.getElementById("jobTableBody");
+            tableBody.innerHTML = "";
+
+            jobs.forEach(job => {
+                const row = document.createElement("tr");
+
+                row.innerHTML = `
+                    <td>${job.id}</td>
+                    <td>${job.jobTitle}</td>
+                    <td>${job.companyName}</td>
+                    <td>${job.location}</td>
+                    <td>${job.salary}</td>
+                    <td>${job.jobType}</td>
+                    <td>${job.requiredSkills}</td>
+                    <td>${job.lastDate}</td>
+                    <td>
+                        <button class="edit-btn"
+                                onclick="editJob(${job.id})">
+                            Edit
+                        </button>
+                        <button class="delete-btn"
+                                onclick="deleteJob(${job.id})">
+                            Delete
+                        </button>
+                    </td>
+                `;
+
+                tableBody.appendChild(row);
+            });
+
+        } catch (error) {
+            console.error(error);
+            showJobMessage("Jobs load nahi ho paaye!", "error");
+        }
+    }
+
+    document.getElementById("jobForm")
+        .addEventListener("submit", async function(event) {
+
+        event.preventDefault();
+
+        const id = document.getElementById("jobId").value;
+
+        const job = {
+            jobTitle: document.getElementById("jobTitle").value,
+            companyName: document.getElementById("jobCompanyName").value,
+            location: document.getElementById("jobLocation").value,
+            salary: document.getElementById("jobSalary").value,
+            jobType: document.getElementById("jobType").value,
+            requiredSkills: document.getElementById("requiredSkills").value,
+            lastDate: document.getElementById("lastDate").value
+        };
+
+        try {
+            let response;
+
+            if (jobEditMode) {
+                response = await fetch(`${JOB_API_URL}/${id}`, {
+                    method: "PUT",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify(job)
+                });
+            } else {
+                response = await fetch(JOB_API_URL, {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify(job)
+                });
+            }
+
+            if (!response.ok) throw new Error("Job request failed");
+
+            showJobMessage(
+                jobEditMode
+                    ? "Job updated successfully!"
+                    : "Job added successfully!",
+                "success"
+            );
+
+            resetJobForm();
+            loadJobs();
+
+        } catch (error) {
+            console.error(error);
+            showJobMessage("Job operation failed!", "error");
+        }
+    });
+
+    async function editJob(id) {
+        try {
+            const response = await fetch(`${JOB_API_URL}/${id}`);
+            if (!response.ok) throw new Error("Job data load failed");
+
+            const job = await response.json();
+
+            document.getElementById("jobId").value = job.id;
+            document.getElementById("jobTitle").value = job.jobTitle;
+            document.getElementById("jobCompanyName").value = job.companyName;
+            document.getElementById("jobLocation").value = job.location;
+            document.getElementById("jobSalary").value = job.salary;
+            document.getElementById("jobType").value = job.jobType;
+            document.getElementById("requiredSkills").value = job.requiredSkills;
+            document.getElementById("lastDate").value = job.lastDate;
+
+            jobEditMode = true;
+
+            document.getElementById("jobFormTitle").innerText = "Update Job";
+            document.getElementById("jobSubmitBtn").innerText = "Update Job";
+            document.getElementById("jobCancelBtn").style.display = "inline-block";
+
+            window.scrollTo({
+                top: document.querySelector(".job-card").offsetTop - 20,
+                behavior: "smooth"
+            });
+
+        } catch (error) {
+            console.error(error);
+            showJobMessage("Job data load nahi hua!", "error");
+        }
+    }
+
+    async function deleteJob(id) {
+        if (!confirm("Are you sure you want to delete this job?")) return;
+
+        try {
+            const response = await fetch(`${JOB_API_URL}/${id}`, {
+                method: "DELETE"
+            });
+
+            if (!response.ok) throw new Error("Job delete failed");
+
+            showJobMessage("Job deleted successfully!", "success");
+            loadJobs();
+
+        } catch (error) {
+            console.error(error);
+            showJobMessage("Job delete nahi hua!", "error");
+        }
+    }
+
+    function cancelJobEdit() {
+        resetJobForm();
+    }
+
+    function resetJobForm() {
+        document.getElementById("jobForm").reset();
+        document.getElementById("jobId").value = "";
+        jobEditMode = false;
+
+        document.getElementById("jobFormTitle").innerText = "Add Job";
+        document.getElementById("jobSubmitBtn").innerText = "Add Job";
+        document.getElementById("jobCancelBtn").style.display = "none";
+    }
+
+    function showJobMessage(text, type) {
+        const message = document.getElementById("jobMessage");
+        message.innerText = text;
+        message.className = "message " + type;
+        message.style.display = "block";
+
+        setTimeout(function() {
+            message.style.display = "none";
+        }, 3000);
+    }
+
+    loadCompanies();
+    loadJobs();
+</script>
+
+</body>
+</html>
