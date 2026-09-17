@@ -2,6 +2,7 @@ package com.placement.placement_management_system.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -30,6 +31,7 @@ public class SecurityConfig {
 
             .authorizeHttpRequests(auth -> auth
 
+                // Public pages and authentication
                 .requestMatchers(
                     "/",
                     "/index.html",
@@ -42,6 +44,32 @@ public class SecurityConfig {
                     "/favicon.ico"
                 ).permitAll()
 
+                // Students
+                .requestMatchers("/api/students/**")
+                .hasAnyRole("STUDENT", "ADMIN")
+
+                // Companies
+                .requestMatchers("/api/companies/**")
+                .hasAnyRole("COMPANY", "ADMIN")
+
+                // Jobs
+                .requestMatchers(HttpMethod.GET, "/api/jobs/**")
+                .hasAnyRole("STUDENT", "COMPANY", "ADMIN")
+
+                .requestMatchers(HttpMethod.POST, "/api/jobs/**")
+                .hasAnyRole("COMPANY", "ADMIN")
+
+                .requestMatchers(HttpMethod.PUT, "/api/jobs/**")
+                .hasAnyRole("COMPANY", "ADMIN")
+
+                .requestMatchers(HttpMethod.DELETE, "/api/jobs/**")
+                .hasAnyRole("COMPANY", "ADMIN")
+
+                // Applications
+                .requestMatchers("/api/applications/**")
+                .hasAnyRole("STUDENT", "COMPANY", "ADMIN")
+
+                // Everything else requires login
                 .anyRequest().authenticated()
             )
 

@@ -15,14 +15,19 @@ public class JwtService {
             "PlacementManagementSystemSecretKey2026ForJWT";
 
     private final SecretKey key =
-            Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
+            Keys.hmacShaKeyFor(
+                    SECRET_KEY.getBytes(StandardCharsets.UTF_8)
+            );
 
-    public String generateToken(String email) {
+    public String generateToken(String email, String role) {
 
         return Jwts.builder()
                 .subject(email)
+                .claim("role", role)
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 86400000))
+                .expiration(
+                        new Date(System.currentTimeMillis() + 86400000)
+                )
                 .signWith(key)
                 .compact();
     }
@@ -35,5 +40,15 @@ public class JwtService {
                 .parseSignedClaims(token)
                 .getPayload()
                 .getSubject();
+    }
+
+    public String extractRole(String token) {
+
+        return Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .get("role", String.class);
     }
 }

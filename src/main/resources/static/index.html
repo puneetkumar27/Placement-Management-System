@@ -5,7 +5,86 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Student Placement Management System</title>
+/* =========================
+   ROLE BASED DASHBOARD
+   ========================= */
 
+.role-badge {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: #2563eb;
+    color: white;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.role-dashboard {
+    margin-bottom: 25px;
+}
+
+.role-dashboard h2 {
+    margin-bottom: 5px;
+}
+
+.role-dashboard p {
+    color: #6b7280;
+}
+
+.hidden-section {
+    display: none !important;
+}
+
+.student-dashboard,
+.company-dashboard,
+.admin-dashboard {
+    display: none;
+}
+
+.student-dashboard.active,
+.company-dashboard.active,
+.admin-dashboard.active {
+    display: block;
+}
+
+.role-info {
+    background: #eff6ff;
+    border-left: 5px solid #2563eb;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 6px;
+}
+
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.quick-action {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.quick-action h3 {
+    margin: 8px 0;
+}
+
+.quick-action p {
+    color: #6b7280;
+    font-size: 14px;
+}
+
+@media (max-width: 700px) {
+    .quick-actions {
+        grid-template-columns: 1fr;
+    }
+}
     <style>
         * {
             box-sizing: border-box;
@@ -219,6 +298,109 @@
 .action-buttons button:hover {
     opacity: 0.85;
 }
+
+        /* =========================
+           DASHBOARD
+           ========================= */
+        .dashboard {
+            margin-bottom: 25px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+            margin-top: 18px;
+        }
+
+        .dashboard-card {
+            background: white;
+            padding: 22px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .dashboard-card .icon {
+            font-size: 30px;
+            margin-bottom: 8px;
+        }
+
+        .dashboard-card h3 {
+            margin: 0 0 8px;
+            color: #374151;
+            font-size: 16px;
+        }
+
+        .dashboard-card .count {
+            font-size: 32px;
+            font-weight: bold;
+            color: #2563eb;
+        }
+
+        .dashboard-panels {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin-top: 18px;
+        }
+
+        .dashboard-panel {
+            background: white;
+            padding: 22px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .dashboard-panel h3 {
+            margin-top: 0;
+            color: #1f2937;
+        }
+
+        .dashboard-list {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .dashboard-list li {
+            margin-bottom: 9px;
+        }
+
+        .status-summary {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .status-item {
+            padding: 12px;
+            border-radius: 7px;
+            background: #f3f4f6;
+            text-align: center;
+        }
+
+        .status-item strong {
+            display: block;
+            font-size: 22px;
+            margin-bottom: 4px;
+        }
+
+        @media (max-width: 900px) {
+            .dashboard-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .dashboard-panels {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .dashboard-grid,
+            .status-summary {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 
@@ -235,9 +417,82 @@
 
 <div class="container">
 
-    <!-- Student Form -->
-    <div class="card">
+    <!-- Dashboard -->
+    <div class="dashboard">
+        <div class="card">
+            <h2>📊 Dashboard</h2>
+            <p>Quick overview of your placement management system.</p>
 
+            <div class="dashboard-grid">
+                <div class="dashboard-card">
+                    <div class="icon">👨‍🎓</div>
+                    <h3>Total Students</h3>
+                    <div class="count" id="dashboardStudentCount">0</div>
+                </div>
+
+                <div class="dashboard-card">
+                    <div class="icon">🏢</div>
+                    <h3>Total Companies</h3>
+                    <div class="count" id="dashboardCompanyCount">0</div>
+                </div>
+
+                <div class="dashboard-card">
+                    <div class="icon">💼</div>
+                    <h3>Total Jobs</h3>
+                    <div class="count" id="dashboardJobCount">0</div>
+                </div>
+
+                <div class="dashboard-card">
+                    <div class="icon">📝</div>
+                    <h3>Total Applications</h3>
+                    <div class="count" id="dashboardApplicationCount">0</div>
+                </div>
+            </div>
+
+            <div class="dashboard-panels">
+                <div class="dashboard-panel">
+                    <h3>Application Status</h3>
+                    <div class="status-summary">
+                        <div class="status-item">
+                            <strong id="dashboardAppliedCount">0</strong>
+                            Applied
+                        </div>
+                        <div class="status-item">
+                            <strong id="dashboardShortlistedCount">0</strong>
+                            Shortlisted
+                        </div>
+                        <div class="status-item">
+                            <strong id="dashboardSelectedCount">0</strong>
+                            Selected
+                        </div>
+                        <div class="status-item">
+                            <strong id="dashboardRejectedCount">0</strong>
+                            Rejected
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-panel">
+                    <h3>Recent Jobs</h3>
+                    <ul class="dashboard-list" id="dashboardRecentJobs">
+                        <li>Loading...</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="dashboard-panel" style="margin-top:18px;">
+                <h3>Recent Applications</h3>
+                <ul class="dashboard-list" id="dashboardRecentApplications">
+                    <li>Loading...</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Student Form -->
+
+<div class="card" id="studentFormSection">
         <h2 id="formTitle">Add Student</h2>
 
         <form id="studentForm">
@@ -284,8 +539,9 @@
     </div>
 
 
-    <!-- Student List -->
-    <div class="card">
+   <!-- Student List -->
+
+<div class="card" id="studentListSection">
 
         <h2>Student List</h2>
 
@@ -372,7 +628,7 @@
     </div>
 
     <!-- Company List -->
-    <div class="card company-card">
+    <div class="card company-card" id="companyListSection">
 
         <h2>Company List</h2>
 
@@ -463,7 +719,7 @@
     </div>
 
     <!-- Job List -->
-    <div class="card job-card">
+    <div class="card job-card" id="jobListSection">
 
         <h2>Job List</h2>
 
@@ -488,7 +744,7 @@
         </table>
 <!-- APPLICATION MANAGEMENT -->
 
-<div class="section">
+<div class="section" id="applicationSection">
     <h2>Application Management</h2>
 
     <form id="applicationForm">
@@ -560,13 +816,307 @@
 
 loadApplications();
 
-
 <script>
     // =========================
     // JWT AUTHENTICATION
     // =========================
 
-    const token = localStorage.getItem("jwtToken");
+   // =========================
+// ROLE BASED ACCESS
+// =========================
+
+const userToken = localStorage.getItem("jwtToken");
+
+function getUserRoleFromToken(token) {
+
+    try {
+
+        if (!token) {
+            return null;
+        }
+
+        const parts = token.split(".");
+
+        if (parts.length !== 3) {
+            return null;
+        }
+
+        const base64 = parts[1]
+            .replace(/-/g, "+")
+            .replace(/_/g, "/");
+
+        const padded = base64 +
+            "=".repeat((4 - base64.length % 4) % 4);
+
+        const payload = JSON.parse(
+            atob(padded)
+        );
+
+        return payload.role
+            ? payload.role.toUpperCase()
+            : null;
+
+    } catch (error) {
+
+        console.error(
+            "Unable to read user role:",
+            error
+        );
+
+        return null;
+    }
+}
+
+
+const currentUserRole =
+    getUserRoleFromToken(userToken);
+
+
+// =========================
+// ROLE CHECK
+// =========================
+
+if (!userToken || !currentUserRole) {
+
+    localStorage.removeItem("jwtToken");
+    localStorage.removeItem("userRole");
+
+    window.location.href = "/auth.html";
+}
+
+
+// Save role
+localStorage.setItem(
+    "userRole",
+    currentUserRole
+);
+
+
+// =========================
+// ROLE UI
+// =========================
+
+function setupRoleBasedDashboard() {
+
+    const roleBadge =
+        document.getElementById("roleBadge");
+
+    const subtitle =
+        document.getElementById("headerSubtitle");
+
+
+    const studentForm =
+        document.getElementById("studentFormSection");
+
+    const studentList =
+        document.getElementById("studentListSection");
+
+    const companyForm =
+        document.getElementById("companyFormSection");
+
+    const companyList =
+        document.getElementById("companyListSection");
+
+    const jobForm =
+        document.getElementById("jobFormSection");
+
+    const jobList =
+        document.getElementById("jobListSection");
+
+    const applicationSection =
+        document.getElementById("applicationSection");
+
+
+    // Hide everything first
+
+    if (studentForm) {
+        studentForm.classList.add("hidden-section");
+    }
+
+    if (studentList) {
+        studentList.classList.add("hidden-section");
+    }
+
+    if (companyForm) {
+        companyForm.classList.add("hidden-section");
+    }
+
+    if (companyList) {
+        companyList.classList.add("hidden-section");
+    }
+
+    if (jobForm) {
+        jobForm.classList.add("hidden-section");
+    }
+
+    if (jobList) {
+        jobList.classList.add("hidden-section");
+    }
+
+    if (applicationSection) {
+        applicationSection.classList.add("hidden-section");
+    }
+
+
+    // =========================
+    // STUDENT
+    // =========================
+
+    if (currentUserRole === "STUDENT") {
+
+        roleBadge.innerText =
+            "👨‍🎓 STUDENT";
+
+        subtitle.innerText =
+            "Student Placement Dashboard";
+
+
+        // Student can see jobs
+        if (jobList) {
+            jobList.classList.remove(
+                "hidden-section"
+            );
+        }
+
+
+        // Student can see applications
+        if (applicationSection) {
+            applicationSection.classList.remove(
+                "hidden-section"
+            );
+        }
+
+    }
+
+
+    // =========================
+    // COMPANY
+    // =========================
+
+    else if (currentUserRole === "COMPANY") {
+
+        roleBadge.innerText =
+            "🏢 COMPANY";
+
+        subtitle.innerText =
+            "Company Placement Dashboard";
+
+
+        // Company management
+        if (companyForm) {
+            companyForm.classList.remove(
+                "hidden-section"
+            );
+        }
+
+        if (companyList) {
+            companyList.classList.remove(
+                "hidden-section"
+            );
+        }
+
+
+        // Company can manage jobs
+        if (jobForm) {
+            jobForm.classList.remove(
+                "hidden-section"
+            );
+        }
+
+        if (jobList) {
+            jobList.classList.remove(
+                "hidden-section"
+            );
+        }
+
+
+        // Applications
+        if (applicationSection) {
+            applicationSection.classList.remove(
+                "hidden-section"
+            );
+        }
+
+    }
+
+
+    // =========================
+    // ADMIN
+    // =========================
+
+    else if (currentUserRole === "ADMIN") {
+
+        roleBadge.innerText =
+            "👨‍💼 ADMIN";
+
+        subtitle.innerText =
+            "Administrator Dashboard";
+
+
+        // Admin sees everything
+
+        if (studentForm) {
+            studentForm.classList.remove(
+                "hidden-section"
+            );
+        }
+
+        if (studentList) {
+            studentList.classList.remove(
+                "hidden-section"
+            );
+        }
+
+        if (companyForm) {
+            companyForm.classList.remove(
+                "hidden-section"
+            );
+        }
+
+        if (companyList) {
+            companyList.classList.remove(
+                "hidden-section"
+            );
+        }
+
+        if (jobForm) {
+            jobForm.classList.remove(
+                "hidden-section"
+            );
+        }
+
+        if (jobList) {
+            jobList.classList.remove(
+                "hidden-section"
+            );
+        }
+
+        if (applicationSection) {
+            applicationSection.classList.remove(
+                "hidden-section"
+            );
+        }
+
+    }
+
+
+    // =========================
+    // UNKNOWN ROLE
+    // =========================
+
+    else {
+
+        localStorage.removeItem("jwtToken");
+        localStorage.removeItem("userRole");
+
+        window.location.href =
+            "/auth.html";
+    }
+}
+
+
+// Run role setup
+setupRoleBasedDashboard();
 
     // index.html is a protected frontend page.
     if (!token) {
@@ -1361,14 +1911,121 @@ loadApplications();
     }
 
 
+
+    // =========================
+    // DASHBOARD
+    // =========================
+    async function loadDashboard() {
+        try {
+            const [studentsResponse, companiesResponse, jobsResponse, applicationsResponse] =
+                await Promise.all([
+                    authFetch("/api/students"),
+                    authFetch("/api/companies"),
+                    authFetch("/api/jobs"),
+                    authFetch("/api/applications")
+                ]);
+
+            if (!studentsResponse || !companiesResponse || !jobsResponse || !applicationsResponse) {
+                return;
+            }
+
+            if (!studentsResponse.ok || !companiesResponse.ok ||
+                !jobsResponse.ok || !applicationsResponse.ok) {
+                throw new Error("Dashboard data load failed");
+            }
+
+            const students = await studentsResponse.json();
+            const companies = await companiesResponse.json();
+            const jobs = await jobsResponse.json();
+            const applications = await applicationsResponse.json();
+
+            document.getElementById("dashboardStudentCount").textContent = students.length;
+            document.getElementById("dashboardCompanyCount").textContent = companies.length;
+            document.getElementById("dashboardJobCount").textContent = jobs.length;
+            document.getElementById("dashboardApplicationCount").textContent = applications.length;
+
+            const statusCounts = {
+                Applied: 0,
+                Shortlisted: 0,
+                Selected: 0,
+                Rejected: 0
+            };
+
+            applications.forEach(application => {
+                if (statusCounts[application.status] !== undefined) {
+                    statusCounts[application.status]++;
+                }
+            });
+
+            document.getElementById("dashboardAppliedCount").textContent = statusCounts.Applied;
+            document.getElementById("dashboardShortlistedCount").textContent = statusCounts.Shortlisted;
+            document.getElementById("dashboardSelectedCount").textContent = statusCounts.Selected;
+            document.getElementById("dashboardRejectedCount").textContent = statusCounts.Rejected;
+
+            const recentJobs = document.getElementById("dashboardRecentJobs");
+            recentJobs.innerHTML = "";
+
+            if (jobs.length === 0) {
+                recentJobs.innerHTML = "<li>No jobs available.</li>";
+            } else {
+                jobs.slice(-5).reverse().forEach(job => {
+                    const li = document.createElement("li");
+                    li.textContent = `${job.jobTitle || "Job"} - ${job.companyName || "Company"}`;
+                    recentJobs.appendChild(li);
+                });
+            }
+
+            const recentApplications = document.getElementById("dashboardRecentApplications");
+            recentApplications.innerHTML = "";
+
+            if (applications.length === 0) {
+                recentApplications.innerHTML = "<li>No applications available.</li>";
+            } else {
+                applications.slice(-5).reverse().forEach(application => {
+                    const li = document.createElement("li");
+                    li.textContent = `${application.studentName || "Student"} applied for ${application.jobTitle || "Job"} - ${application.status || "Pending"}`;
+                    recentApplications.appendChild(li);
+                });
+            }
+
+        } catch (error) {
+            console.error("Dashboard error:", error);
+        }
+    }
+
     // =========================
     // PAGE LOAD
     // =========================
+
+    
+    // =========================
+// PAGE LOAD
+// =========================
+
+if (currentUserRole === "STUDENT") {
+
+    loadJobs();
+    loadApplications();
+
+}
+
+else if (currentUserRole === "COMPANY") {
+
+    loadCompanies();
+    loadJobs();
+    loadApplications();
+
+}
+
+else if (currentUserRole === "ADMIN") {
 
     loadStudents();
     loadCompanies();
     loadJobs();
     loadApplications();
+    loadDashboard();
+
+}
 </script>
 
 

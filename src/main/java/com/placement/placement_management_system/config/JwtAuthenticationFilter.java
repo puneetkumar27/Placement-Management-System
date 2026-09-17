@@ -41,15 +41,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String token = authHeader.substring(7);
 
             String email = jwtService.extractEmail(token);
+            String role = jwtService.extractRole(token);
 
             if (email != null &&
                     SecurityContextHolder.getContext().getAuthentication() == null) {
+
+                if (role == null || role.isBlank()) {
+                    role = "STUDENT";
+                }
 
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
                                 email,
                                 null,
-                                List.of(new SimpleGrantedAuthority("ROLE_USER"))
+                                List.of(
+                                        new SimpleGrantedAuthority(
+                                                "ROLE_" + role.toUpperCase()
+                                        )
+                                )
                         );
 
                 SecurityContextHolder.getContext()
@@ -57,7 +66,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
 
         } catch (Exception e) {
-            // Invalid or expired token
+            // Invalid or expired JWT token
         }
 
         filterChain.doFilter(request, response);

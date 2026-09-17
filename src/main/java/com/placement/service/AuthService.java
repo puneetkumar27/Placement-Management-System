@@ -13,9 +13,11 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
-    public AuthService(UserRepository userRepository,
-                       PasswordEncoder passwordEncoder,
-                       JwtService jwtService) {
+    public AuthService(
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder,
+            JwtService jwtService) {
+
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
@@ -23,7 +25,17 @@ public class AuthService {
 
     public String register(User user) {
 
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+            throw new RuntimeException("Email already registered");
+        }
+
+        if (user.getRole() == null || user.getRole().isBlank()) {
+            user.setRole("STUDENT");
+        }
+
+        user.setPassword(
+                passwordEncoder.encode(user.getPassword())
+        );
 
         userRepository.save(user);
 
@@ -33,12 +45,24 @@ public class AuthService {
     public String login(String email, String password) {
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Invalid email or password"));
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Invalid email or password"
+                        )
+                );
 
-        if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new RuntimeException("Invalid email or password");
+        if (!passwordEncoder.matches(
+                password,
+                user.getPassword())) {
+
+            throw new RuntimeException(
+                    "Invalid email or password"
+            );
         }
 
-        return jwtService.generateToken(user.getEmail());
+        return jwtService.generateToken(
+                user.getEmail(),
+                user.getRole()
+        );
     }
 }
