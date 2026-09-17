@@ -227,6 +227,10 @@
 <header>
     <h1>Student Placement Management System</h1>
     <p>Manage Student Records</p>
+    <button type="button" onclick="logout()"
+            style="background:#dc2626;color:white;margin-top:10px;">
+        Logout
+    </button>
 </header>
 
 <div class="container">
@@ -556,250 +560,76 @@
 
 loadApplications();
 
+
 <script>
+    // =========================
+    // JWT AUTHENTICATION
+    // =========================
 
-    const API_URL = "/api/students";
-    const APPLICATION_API_URL = "/api/applications";
+    const token = localStorage.getItem("jwtToken");
 
-let applicationEditMode = false;
-
-a
-
-        document.getElementById("applicationSubmitButton").textContent =
-            "Update Application";
-
-        document.getElementById("applicationCancelButton").style.display =
-            "inline-block";
-
-        document.getElementById("applicationForm")
-            .scrollIntoView({ behavior: "smooth" });
-
-    } catch (error) {
-
-        console.error("Error editing application:", error);
-
-    }
-}
-async function deleteApplication(id) {
-
-    if (!confirm("Are you sure you want to delete this application?")) {
-        return;
+    // index.html is a protected frontend page.
+    if (!token) {
+        window.location.href = "/auth.html";
     }
 
-    try {
-
-        const response = await fetch(
-            `${APPLICATION_API_URL}/${id}`,
-            {
-                method: "DELETE"
-            }
-        );
-
-        if (!response.ok) {
-            throw new Error("Failed to delete application");
-        }
-
-        alert("Application deleted successfully!");
-
-        loadApplications();
-
-    } catch (error) {
-
-        console.error("Error deleting application:", error);
-
-    }
-}
-document
-    .getElementById("applicationForm")
-    .addEventListener("submit", async function(event) {
-
-        event.preventDefault();
-
-        const id =
-            document.getElementById("applicationId").value;
-
-        const application = {
-            studentName:
-                document.getElementById("applicationStudentName").value,
-
-            jobTitle:
-                document.getElementById("applicationJobTitle").value,
-
-            companyName:
-                document.getElementById("applicationCompanyName").value,
-
-            appliedDate:
-                document.getElementById("applicationAppliedDate").value,
-
-            status:
-                document.getElementById("applicationStatus").value
+    function authHeaders(includeJson = false) {
+        const headers = {
+            "Authorization": `Bearer ${localStorage.getItem("jwtToken") || ""}`
         };
 
-        try {
-
-            let response;
-
-            if (applicationEditMode) {
-
-                response = await fetch(
-                    `${APPLICATION_API_URL}/${id}`,
-                    {
-                        method: "PUT",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify(application)
-                    }
-                );
-
-            } else {
-
-                response = await fetch(
-                    APPLICATION_API_URL,
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify(application)
-                    }
-                );
-            }
-
-            if (!response.ok) {
-                throw new Error("Failed to save application");
-            }
-
-            alert(
-                applicationEditModesync function loadApplications() {
-
-    try {
-
-        const response = await fetch(APPLICATION_API_URL);
-
-        if (!response.ok) {
-            throw new Error("Failed to load applications");
+        if (includeJson) {
+            headers["Content-Type"] = "application/json";
         }
 
-        const applications = await response.json();
-
-        const tableBody =
-            document.getElementById("applicationTableBody");
-
-        tableBody.innerHTML = "";
-
-        applications.forEach(application => {
-
-            const row = document.createElement("tr");
-
-            row.innerHTML = `
-                <td>${application.id}</td>
-                <td>${application.studentName}</td>
-                <td>${application.jobTitle}</td>
-                <td>${application.companyName}</td>
-                <td>${application.appliedDate}</td>
-                <td>${application.status}</td>
-
-                <td>
-                    <div class="action-buttons">
-
-                        <button
-                            class="edit-btn"
-                            onclick="editApplication(${application.id})">
-                            Edit
-                        </button>
-
-                        <button
-                            class="delete-btn"
-                            onclick="deleteApplication(${application.id})">
-                            Delete
-                        </button>
-
-                    </div>
-                </td>
-            `;
-
-            tableBody.appendChild(row);
-        });
-
-    } catch (error) {
-
-        console.error("Error loading applications:", error);
-
+        return headers;
     }
-}
-async function editApplication(id) {
 
-    try {
+    async function authFetch(url, options = {}) {
+        options.headers = {
+            ...authHeaders(!!options.body),
+            ...(options.headers || {})
+        };
 
-        const response =
-            await fetch(`${APPLICATION_API_URL}/${id}`);
+        const response = await fetch(url, options);
 
-        if (!response.ok) {
-            throw new Error("Failed to load application");
+        // Token expired/invalid -> login page
+        if (response.status === 401 || response.status === 403) {
+            localStorage.removeItem("jwtToken");
+            window.location.href = "/auth.html";
+            return null;
         }
 
-        const application = await response.json();
+        return response;
+    }
 
-        document.getElementById("applicationId").value =
-            application.id;
+    function logout() {
+        localStorage.removeItem("jwtToken");
+        window.location.href = "/auth.html";
+    }
 
-        document.getElementById("applicationStudentName").value =
-            application.studentName;
 
-        document.getElementById("applicationJobTitle").value =
-            application.jobTitle;
+    // =========================
+    // STUDENT MANAGEMENT
+    // =========================
 
-        document.getElementById("applicationCompanyName").value =
-            application.companyName;
-
-        document.getElementById("applicationAppliedDate").value =
-            application.appliedDate;
-
-        document.getElementById("applicationStatus").value =
-            application.status;
-
-        applicationEditMode = true;
-                    ? "Application updated successfully!"
-                    : "Application added successfully!"
-            );
-
-            cancelApplicationEdit();
-            loadApplications();
-
-        } catch (error) {
-
-            console.error("Error saving application:", error);
-
-        }
-    });
-
+    const API_URL = "/api/students";
     let editMode = false;
 
-
-    // =========================
-    // LOAD ALL STUDENTS
-    // =========================
-
     async function loadStudents() {
-
         try {
-
-            const response = await fetch(API_URL);
+            const response = await authFetch(API_URL);
+            if (!response) return;
 
             if (!response.ok) {
                 throw new Error("Failed to load students");
             }
 
             const students = await response.json();
-
-            const tableBody =
-                document.getElementById("studentTableBody");
-
+            const tableBody = document.getElementById("studentTableBody");
             tableBody.innerHTML = "";
 
             students.forEach(student => {
-
                 const row = document.createElement("tr");
 
                 row.innerHTML = `
@@ -809,358 +639,162 @@ async function editApplication(id) {
                     <td>${student.phone}</td>
                     <td>${student.course}</td>
                     <td>${student.skills}</td>
-
                     <td>
-    <div class="action-buttons">
-        <button
-            class="edit-btn"
-            onclick="editStudent(${student.id})">
-            Edit
-        </button>
-
-        <button
-            class="delete-btn"
-            onclick="deleteStudent(${student.id})">
-            Delete
-        </button>
-    </div>
-</td>
+                        <div class="action-buttons">
+                            <button class="edit-btn"
+                                    onclick="editStudent(${student.id})">
+                                Edit
+                            </button>
+                            <button class="delete-btn"
+                                    onclick="deleteStudent(${student.id})">
+                                Delete
+                            </button>
+                        </div>
+                    </td>
                 `;
 
                 tableBody.appendChild(row);
-
             });
-
         } catch (error) {
-
             console.error(error);
-
-            showMessage(
-                "Students load nahi ho paaye!",
-                "error"
-            );
+            showMessage("Students load nahi ho paaye!", "error");
         }
     }
 
+    document.getElementById("studentForm").addEventListener("submit", async function(event) {
+        event.preventDefault();
 
-    // =========================
-    // ADD / UPDATE STUDENT
-    // =========================
+        const id = document.getElementById("studentId").value;
 
-    document
-        .getElementById("studentForm")
-        .addEventListener("submit", async function(event) {
-
-            event.preventDefault();
-
-            const id =
-                document.getElementById("studentId").value;
-
-            const student = {
-
-                name:
-                    document.getElementById("name").value,
-
-                email:
-                    document.getElementById("email").value,
-
-                phone:
-                    document.getElementById("phone").value,
-
-                course:
-                    document.getElementById("course").value,
-
-                skills:
-                    document.getElementById("skills").value
-            };
-
-
-            try {
-
-                let response;
-
-                // UPDATE
-                if (editMode) {
-
-                    response = await fetch(
-                        `${API_URL}/${id}`,
-                        {
-                            method: "PUT",
-
-                            headers: {
-                                "Content-Type":
-                                    "application/json"
-                            },
-
-                            body: JSON.stringify(student)
-                        }
-                    );
-
-                }
-
-                // ADD
-                else {
-
-                    response = await fetch(
-                        API_URL,
-                        {
-                            method: "POST",
-
-                            headers: {
-                                "Content-Type":
-                                    "application/json"
-                            },
-
-                            body: JSON.stringify(student)
-                        }
-                    );
-                }
-
-
-                if (!response.ok) {
-
-                    throw new Error(
-                        "Request failed"
-                    );
-                }
-
-
-                if (editMode) {
-
-                    showMessage(
-                        "Student updated successfully!",
-                        "success"
-                    );
-
-                } else {
-
-                    showMessage(
-                        "Student added successfully!",
-                        "success"
-                    );
-                }
-
-
-                resetForm();
-
-                loadStudents();
-
-            } catch (error) {
-
-                console.error(error);
-
-                showMessage(
-                    "Operation failed!",
-                    "error"
-                );
-            }
-
-        });
-
-
-    // =========================
-    // EDIT STUDENT
-    // =========================
-
-    async function editStudent(id) {
+        const student = {
+            name: document.getElementById("name").value,
+            email: document.getElementById("email").value,
+            phone: document.getElementById("phone").value,
+            course: document.getElementById("course").value,
+            skills: document.getElementById("skills").value
+        };
 
         try {
+            let response;
 
-            const response =
-                await fetch(`${API_URL}/${id}`);
-
-
-            if (!response.ok) {
-
-                throw new Error(
-                    "Student data load nahi hua"
-                );
+            if (editMode) {
+                response = await authFetch(`${API_URL}/${id}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(student)
+                });
+            } else {
+                response = await authFetch(API_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(student)
+                });
             }
 
-
-            const student =
-                await response.json();
-
-
-            document.getElementById("studentId").value =
-                student.id;
-
-            document.getElementById("name").value =
-                student.name;
-
-            document.getElementById("email").value =
-                student.email;
-t.getElementById("phone").value =
-                student.phone;
-
-            document.getElementById("course").value =
-                student.course;
-
-            document.getElementById("skills").value =
-                student.skills;
-
-
-            editMode = true;
-
-
-            document.getElementById("formTitle").innerText =
-                "Update Student";
-
-            document.getElementById("submitBtn").innerText =
-                "Update Student";
-
-            document.getElementById("cancelBtn").style.display =
-                "inline-block";
-
-
-            window.scrollTo({
-                top: 0,
-                behavior: "smooth"
-            });
-
-
-        } catch (error) {
-
-            console.error(error);
-
-            showMessage(
-                "Student data load nahi hua!",
-                "error"
-            );
-        }
-    }
-
-
-    // =========================
-    // DELETE STUDENT
-    // =========================
-
-    async function deleteStudent(id) {
-
-        const confirmDelete =
-            confirm(
-                "Are you sure you want to delete this student?"
-            );
-
-
-        if (!confirmDelete) {
-            return;
-        }
-
-
-        try {
-
-            const response =
-                await fetch(
-                    `${API_URL}/${id}`,
-                    {
-                        method: "DELETE"
-                    }
-                );
-
+            if (!response) return;
 
             if (!response.ok) {
-
-                throw new Error(
-                    "Delete failed"
-                );
+                throw new Error("Request failed");
             }
 
-
             showMessage(
-                "Student deleted successfully!",
+                editMode
+                    ? "Student updated successfully!"
+                    : "Student added successfully!",
                 "success"
             );
 
-
+            resetForm();
             loadStudents();
 
+        } catch (error) {
+            console.error(error);
+            showMessage("Operation failed!", "error");
+        }
+    });
+
+    async function editStudent(id) {
+        try {
+            const response = await authFetch(`${API_URL}/${id}`);
+            if (!response) return;
+
+            if (!response.ok) {
+                throw new Error("Student data load failed");
+            }
+
+            const student = await response.json();
+
+            document.getElementById("studentId").value = student.id;
+            document.getElementById("name").value = student.name;
+            document.getElementById("email").value = student.email;
+            document.getElementById("phone").value = student.phone;
+            document.getElementById("course").value = student.course;
+            document.getElementById("skills").value = student.skills;
+
+            editMode = true;
+
+            document.getElementById("formTitle").innerText = "Update Student";
+            document.getElementById("submitBtn").innerText = "Update Student";
+            document.getElementById("cancelBtn").style.display = "inline-block";
+
+            window.scrollTo({ top: 0, behavior: "smooth" });
 
         } catch (error) {
-
             console.error(error);
-
-            showMessage(
-                "Student delete nahi hua!",
-                "error"
-            );
+            showMessage("Student data load nahi hua!", "error");
         }
     }
 
+    async function deleteStudent(id) {
+        if (!confirm("Are you sure you want to delete this student?")) {
+            return;
+        }
 
-    // =========================
-    // CANCEL EDIT
-    // =========================
+        try {
+            const response = await authFetch(`${API_URL}/${id}`, {
+                method: "DELETE"
+            });
+
+            if (!response) return;
+
+            if (!response.ok) {
+                throw new Error("Delete failed");
+            }
+
+            showMessage("Student deleted successfully!", "success");
+            loadStudents();
+
+        } catch (error) {
+            console.error(error);
+            showMessage("Student delete nahi hua!", "error");
+        }
+    }
 
     function cancelEdit() {
-
         resetForm();
-
     }
-
-
-    // =========================
-    // RESET FORM
-    // =========================
 
     function resetForm() {
-
-        document
-            .getElementById("studentForm")
-            .reset();
-
-
-        document.getElementById("studentId").value =
-            "";
-
-
+        document.getElementById("studentForm").reset();
+        document.getElementById("studentId").value = "";
         editMode = false;
 
-
-        document.getElementById("formTitle").innerText =
-            "Add Student";
-
-        document.getElementById("submitBtn").innerText =
-            "Add Student";
-
-        document.getElementById("cancelBtn").style.display =
-            "none";
+        document.getElementById("formTitle").innerText = "Add Student";
+        document.getElementById("submitBtn").innerText = "Add Student";
+        document.getElementById("cancelBtn").style.display = "none";
     }
-
-
-    // =========================
-    // MESSAGE
-    // =========================
 
     function showMessage(text, type) {
-
-        const message =
-            document.getElementById("message");
-
+        const message = document.getElementById("message");
 
         message.innerText = text;
-
-        message.className =
-            "message " + type;
-
-        message.style.display =
-            "block";
-
+        message.className = "message " + type;
+        message.style.display = "block";
 
         setTimeout(function() {
-
-            message.style.display =
-                "none";
-
+            message.style.display = "none";
         }, 3000);
     }
-
-
-    // =========================
-    // PAGE LOAD
-    // =========================
-
-    loadStudents();
 
 
     // =========================
@@ -1172,8 +806,12 @@ t.getElementById("phone").value =
 
     async function loadCompanies() {
         try {
-            const response = await fetch(COMPANY_API_URL);
-            if (!response.ok) throw new Error("Failed to load companies");
+            const response = await authFetch(COMPANY_API_URL);
+            if (!response) return;
+
+            if (!response.ok) {
+                throw new Error("Failed to load companies");
+            }
 
             const companies = await response.json();
             const tableBody = document.getElementById("companyTableBody");
@@ -1181,28 +819,27 @@ t.getElementById("phone").value =
 
             companies.forEach(company => {
                 const row = document.createElement("tr");
-     <td>${company.email}</td>
+
+                row.innerHTML = `
+                    <td>${company.id}</td>
+                    <td>${company.companyName}</td>
+                    <td>${company.email}</td>
                     <td>${company.phone}</td>
                     <td>${company.location}</td>
                     <td>${company.website || ""}</td>
                     <td>${company.jobRole}</td>
-             <td>
-                row.innerHTML = `
-                    <td>${company.id}</td>
-                    <td>${company.companyName}</td>
-               
-    <div class="action-buttons">
-        <button class="edit-btn"
-                onclick="editCompany(${company.id})">
-            Edit
-        </button>
-
-        <button class="delete-btn"
-                onclick="deleteCompany(${company.id})">
-            Delete
-        </button>
-    </div>
-</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="edit-btn"
+                                    onclick="editCompany(${company.id})">
+                                Edit
+                            </button>
+                            <button class="delete-btn"
+                                    onclick="deleteCompany(${company.id})">
+                                Delete
+                            </button>
+                        </div>
+                    </td>
                 `;
 
                 tableBody.appendChild(row);
@@ -1214,9 +851,7 @@ t.getElementById("phone").value =
         }
     }
 
-    document.getElementById("companyForm")
-        .addEventListener("submit", async function(event) {
-
+    document.getElementById("companyForm").addEventListener("submit", async function(event) {
         event.preventDefault();
 
         const id = document.getElementById("companyId").value;
@@ -1234,20 +869,24 @@ t.getElementById("phone").value =
             let response;
 
             if (companyEditMode) {
-                response = await fetch(`${COMPANY_API_URL}/${id}`, {
+                response = await authFetch(`${COMPANY_API_URL}/${id}`, {
                     method: "PUT",
-                    headers: {"Content-Type": "application/json"},
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(company)
                 });
             } else {
-                response = await fetch(COMPANY_API_URL, {
+                response = await authFetch(COMPANY_API_URL, {
                     method: "POST",
-                    headers: {"Content-Type": "application/json"},
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(company)
                 });
             }
 
-            if (!response.ok) throw new Error("Company request failed");
+            if (!response) return;
+
+            if (!response.ok) {
+                throw new Error("Company request failed");
+            }
 
             showCompanyMessage(
                 companyEditMode
@@ -1267,8 +906,12 @@ t.getElementById("phone").value =
 
     async function editCompany(id) {
         try {
-            const response = await fetch(`${COMPANY_API_URL}/${id}`);
-            if (!response.ok) throw new Error("Company data load failed");
+            const response = await authFetch(`${COMPANY_API_URL}/${id}`);
+            if (!response) return;
+
+            if (!response.ok) {
+                throw new Error("Company data load failed");
+            }
 
             const company = await response.json();
 
@@ -1301,11 +944,15 @@ t.getElementById("phone").value =
         if (!confirm("Are you sure you want to delete this company?")) return;
 
         try {
-            const response = await fetch(`${COMPANY_API_URL}/${id}`, {
+            const response = await authFetch(`${COMPANY_API_URL}/${id}`, {
                 method: "DELETE"
             });
 
-            if (!response.ok) throw new Error("Company delete failed");
+            if (!response) return;
+
+            if (!response.ok) {
+                throw new Error("Company delete failed");
+            }
 
             showCompanyMessage("Company deleted successfully!", "success");
             loadCompanies();
@@ -1332,6 +979,7 @@ t.getElementById("phone").value =
 
     function showCompanyMessage(text, type) {
         const message = document.getElementById("companyMessage");
+
         message.innerText = text;
         message.className = "message " + type;
         message.style.display = "block";
@@ -1351,8 +999,12 @@ t.getElementById("phone").value =
 
     async function loadJobs() {
         try {
-            const response = await fetch(JOB_API_URL);
-            if (!response.ok) throw new Error("Failed to load jobs");
+            const response = await authFetch(JOB_API_URL);
+            if (!response) return;
+
+            if (!response.ok) {
+                throw new Error("Failed to load jobs");
+            }
 
             const jobs = await response.json();
             const tableBody = document.getElementById("jobTableBody");
@@ -1371,14 +1023,16 @@ t.getElementById("phone").value =
                     <td>${job.requiredSkills}</td>
                     <td>${job.lastDate}</td>
                     <td>
-                        <button class="edit-btn"
-                                onclick="editJob(${job.id})">
-                            Edit
-                        </button>
-                        <button class="delete-btn"
-                                onclick="deleteJob(${job.id})">
-                            Delete
-                        </button>
+                        <div class="action-buttons">
+                            <button class="edit-btn"
+                                    onclick="editJob(${job.id})">
+                                Edit
+                            </button>
+                            <button class="delete-btn"
+                                    onclick="deleteJob(${job.id})">
+                                Delete
+                            </button>
+                        </div>
                     </td>
                 `;
 
@@ -1391,9 +1045,7 @@ t.getElementById("phone").value =
         }
     }
 
-    document.getElementById("jobForm")
-        .addEventListener("submit", async function(event) {
-
+    document.getElementById("jobForm").addEventListener("submit", async function(event) {
         event.preventDefault();
 
         const id = document.getElementById("jobId").value;
@@ -1412,20 +1064,24 @@ t.getElementById("phone").value =
             let response;
 
             if (jobEditMode) {
-                response = await fetch(`${JOB_API_URL}/${id}`, {
+                response = await authFetch(`${JOB_API_URL}/${id}`, {
                     method: "PUT",
-                    headers: {"Content-Type": "application/json"},
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(job)
                 });
             } else {
-                response = await fetch(JOB_API_URL, {
+                response = await authFetch(JOB_API_URL, {
                     method: "POST",
-                    headers: {"Content-Type": "application/json"},
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(job)
                 });
             }
 
-            if (!response.ok) throw new Error("Job request failed");
+            if (!response) return;
+
+            if (!response.ok) {
+                throw new Error("Job request failed");
+            }
 
             showJobMessage(
                 jobEditMode
@@ -1445,8 +1101,12 @@ t.getElementById("phone").value =
 
     async function editJob(id) {
         try {
-            const response = await fetch(`${JOB_API_URL}/${id}`);
-            if (!response.ok) throw new Error("Job data load failed");
+            const response = await authFetch(`${JOB_API_URL}/${id}`);
+            if (!response) return;
+
+            if (!response.ok) {
+                throw new Error("Job data load failed");
+            }
 
             const job = await response.json();
 
@@ -1480,11 +1140,15 @@ t.getElementById("phone").value =
         if (!confirm("Are you sure you want to delete this job?")) return;
 
         try {
-            const response = await fetch(`${JOB_API_URL}/${id}`, {
+            const response = await authFetch(`${JOB_API_URL}/${id}`, {
                 method: "DELETE"
             });
 
-            if (!response.ok) throw new Error("Job delete failed");
+            if (!response) return;
+
+            if (!response.ok) {
+                throw new Error("Job delete failed");
+            }
 
             showJobMessage("Job deleted successfully!", "success");
             loadJobs();
@@ -1511,6 +1175,7 @@ t.getElementById("phone").value =
 
     function showJobMessage(text, type) {
         const message = document.getElementById("jobMessage");
+
         message.innerText = text;
         message.className = "message " + type;
         message.style.display = "block";
@@ -1520,9 +1185,192 @@ t.getElementById("phone").value =
         }, 3000);
     }
 
+
+    // =========================
+    // APPLICATION MANAGEMENT
+    // =========================
+
+    const APPLICATION_API_URL = "/api/applications";
+    let applicationEditMode = false;
+
+    document.getElementById("applicationForm").addEventListener("submit", async function(event) {
+        event.preventDefault();
+
+        const id = document.getElementById("applicationId").value;
+
+        const application = {
+            studentName: document.getElementById("applicationStudentName").value,
+            jobTitle: document.getElementById("applicationJobTitle").value,
+            companyName: document.getElementById("applicationCompanyName").value,
+            appliedDate: document.getElementById("applicationAppliedDate").value,
+            status: document.getElementById("applicationStatus").value
+        };
+
+        try {
+            let response;
+
+            if (applicationEditMode) {
+                response = await authFetch(`${APPLICATION_API_URL}/${id}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(application)
+                });
+            } else {
+                response = await authFetch(APPLICATION_API_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(application)
+                });
+            }
+
+            if (!response) return;
+
+            if (!response.ok) {
+                throw new Error("Failed to save application");
+            }
+
+            const message = document.getElementById("applicationMessage");
+            message.innerText = applicationEditMode
+                ? "Application updated successfully!"
+                : "Application added successfully!";
+            message.style.display = "block";
+
+            resetApplicationForm();
+            loadApplications();
+
+        } catch (error) {
+            console.error(error);
+            const message = document.getElementById("applicationMessage");
+            message.innerText = "Application operation failed!";
+            message.style.display = "block";
+        }
+    });
+
+    async function loadApplications() {
+        try {
+            const response = await authFetch(APPLICATION_API_URL);
+            if (!response) return;
+
+            if (!response.ok) {
+                throw new Error("Failed to load applications");
+            }
+
+            const applications = await response.json();
+            const tableBody = document.getElementById("applicationTableBody");
+            tableBody.innerHTML = "";
+
+            applications.forEach(application => {
+                const row = document.createElement("tr");
+
+                row.innerHTML = `
+                    <td>${application.id}</td>
+                    <td>${application.studentName}</td>
+                    <td>${application.jobTitle}</td>
+                    <td>${application.companyName}</td>
+                    <td>${application.appliedDate}</td>
+                    <td>${application.status}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="edit-btn"
+                                    onclick="editApplication(${application.id})">
+                                Edit
+                            </button>
+                            <button class="delete-btn"
+                                    onclick="deleteApplication(${application.id})">
+                                Delete
+                            </button>
+                        </div>
+                    </td>
+                `;
+
+                tableBody.appendChild(row);
+            });
+
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    async function editApplication(id) {
+        try {
+            const response = await authFetch(`${APPLICATION_API_URL}/${id}`);
+            if (!response) return;
+
+            if (!response.ok) {
+                throw new Error("Failed to load application");
+            }
+
+            const application = await response.json();
+
+            document.getElementById("applicationId").value = application.id;
+            document.getElementById("applicationStudentName").value = application.studentName;
+            document.getElementById("applicationJobTitle").value = application.jobTitle;
+            document.getElementById("applicationCompanyName").value = application.companyName;
+            document.getElementById("applicationAppliedDate").value = application.appliedDate;
+            document.getElementById("applicationStatus").value = application.status;
+
+            applicationEditMode = true;
+
+            document.getElementById("applicationSubmitButton").textContent = "Update Application";
+            document.getElementById("applicationCancelButton").style.display = "inline-block";
+
+            document.getElementById("applicationForm").scrollIntoView({
+                behavior: "smooth"
+            });
+
+        } catch (error) {
+            console.error("Error editing application:", error);
+        }
+    }
+
+    async function deleteApplication(id) {
+        if (!confirm("Are you sure you want to delete this application?")) {
+            return;
+        }
+
+        try {
+            const response = await authFetch(`${APPLICATION_API_URL}/${id}`, {
+                method: "DELETE"
+            });
+
+            if (!response) return;
+
+            if (!response.ok) {
+                throw new Error("Failed to delete application");
+            }
+
+            alert("Application deleted successfully!");
+            loadApplications();
+
+        } catch (error) {
+            console.error("Error deleting application:", error);
+        }
+    }
+
+    function cancelApplicationEdit() {
+        resetApplicationForm();
+    }
+
+    function resetApplicationForm() {
+        document.getElementById("applicationForm").reset();
+        document.getElementById("applicationId").value = "";
+        applicationEditMode = false;
+
+        document.getElementById("applicationSubmitButton").textContent = "Add Application";
+        document.getElementById("applicationCancelButton").style.display = "none";
+    }
+
+
+    // =========================
+    // PAGE LOAD
+    // =========================
+
+    loadStudents();
     loadCompanies();
     loadJobs();
+    loadApplications();
 </script>
+
 
 </body>
 </html>

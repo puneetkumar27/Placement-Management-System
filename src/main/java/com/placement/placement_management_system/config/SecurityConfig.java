@@ -33,8 +33,13 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/",
                     "/index.html",
+                    "/auth.html",
                     "/api/home",
-                    "/api/auth/**"
+                    "/api/auth/**",
+                    "/css/**",
+                    "/js/**",
+                    "/images/**",
+                    "/favicon.ico"
                 ).permitAll()
 
                 .anyRequest().authenticated()
