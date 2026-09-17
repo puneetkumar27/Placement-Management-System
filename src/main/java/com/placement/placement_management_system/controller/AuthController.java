@@ -1,8 +1,7 @@
 package com.placement.placement_management_system.controller;
 
 import com.placement.placement_management_system.model.User;
-import com.placement.placement_management_system.repository.UserRepository;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import com.placement.placement_management_system.service.AuthService;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -10,24 +9,27 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin(origins = "*")
 public class AuthController {
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final AuthService authService;
 
-    public AuthController(UserRepository userRepository,
-                          PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
+    public AuthController(AuthService authService) {
+        this.authService = authService;
     }
 
     @PostMapping("/register")
-    public User register(@RequestBody User user) {
+    public String register(@RequestBody User user) {
 
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        return authService.register(user);
+    }
 
-        if (user.getRole() == null || user.getRole().isBlank()) {
-            user.setRole("STUDENT");
-        }
+    @PostMapping("/login")
+    public String login(@RequestBody LoginRequest request) {
 
-        return userRepository.save(user);
+        return authService.login(
+                request.email(),
+                request.password()
+        );
+    }
+
+    public record LoginRequest(String email, String password) {
     }
 }

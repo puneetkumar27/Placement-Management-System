@@ -563,95 +563,7 @@ loadApplications();
 
 let applicationEditMode = false;
 
-async function loadApplications() {
-
-    try {
-
-        const response = await fetch(APPLICATION_API_URL);
-
-        if (!response.ok) {
-            throw new Error("Failed to load applications");
-        }
-
-        const applications = await response.json();
-
-        const tableBody =
-            document.getElementById("applicationTableBody");
-
-        tableBody.innerHTML = "";
-
-        applications.forEach(application => {
-
-            const row = document.createElement("tr");
-
-            row.innerHTML = `
-                <td>${application.id}</td>
-                <td>${application.studentName}</td>
-                <td>${application.jobTitle}</td>
-                <td>${application.companyName}</td>
-                <td>${application.appliedDate}</td>
-                <td>${application.status}</td>
-
-                <td>
-                    <div class="action-buttons">
-
-                        <button
-                            class="edit-btn"
-                            onclick="editApplication(${application.id})">
-                            Edit
-                        </button>
-
-                        <button
-                            class="delete-btn"
-                            onclick="deleteApplication(${application.id})">
-                            Delete
-                        </button>
-
-                    </div>
-                </td>
-            `;
-
-            tableBody.appendChild(row);
-        });
-
-    } catch (error) {
-
-        console.error("Error loading applications:", error);
-
-    }
-}
-async function editApplication(id) {
-
-    try {
-
-        const response =
-            await fetch(`${APPLICATION_API_URL}/${id}`);
-
-        if (!response.ok) {
-            throw new Error("Failed to load application");
-        }
-
-        const application = await response.json();
-
-        document.getElementById("applicationId").value =
-            application.id;
-
-        document.getElementById("applicationStudentName").value =
-            application.studentName;
-
-        document.getElementById("applicationJobTitle").value =
-            application.jobTitle;
-
-        document.getElementById("applicationCompanyName").value =
-            application.companyName;
-
-        document.getElementById("applicationAppliedDate").value =
-            application.appliedDate;
-
-        document.getElementById("applicationStatus").value =
-            application.status;
-
-        applicationEditMode = true;
+a
 
         document.getElementById("applicationSubmitButton").textContent =
             "Update Application";
@@ -759,7 +671,95 @@ document
             }
 
             alert(
-                applicationEditMode
+                applicationEditModesync function loadApplications() {
+
+    try {
+
+        const response = await fetch(APPLICATION_API_URL);
+
+        if (!response.ok) {
+            throw new Error("Failed to load applications");
+        }
+
+        const applications = await response.json();
+
+        const tableBody =
+            document.getElementById("applicationTableBody");
+
+        tableBody.innerHTML = "";
+
+        applications.forEach(application => {
+
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+                <td>${application.id}</td>
+                <td>${application.studentName}</td>
+                <td>${application.jobTitle}</td>
+                <td>${application.companyName}</td>
+                <td>${application.appliedDate}</td>
+                <td>${application.status}</td>
+
+                <td>
+                    <div class="action-buttons">
+
+                        <button
+                            class="edit-btn"
+                            onclick="editApplication(${application.id})">
+                            Edit
+                        </button>
+
+                        <button
+                            class="delete-btn"
+                            onclick="deleteApplication(${application.id})">
+                            Delete
+                        </button>
+
+                    </div>
+                </td>
+            `;
+
+            tableBody.appendChild(row);
+        });
+
+    } catch (error) {
+
+        console.error("Error loading applications:", error);
+
+    }
+}
+async function editApplication(id) {
+
+    try {
+
+        const response =
+            await fetch(`${APPLICATION_API_URL}/${id}`);
+
+        if (!response.ok) {
+            throw new Error("Failed to load application");
+        }
+
+        const application = await response.json();
+
+        document.getElementById("applicationId").value =
+            application.id;
+
+        document.getElementById("applicationStudentName").value =
+            application.studentName;
+
+        document.getElementById("applicationJobTitle").value =
+            application.jobTitle;
+
+        document.getElementById("applicationCompanyName").value =
+            application.companyName;
+
+        document.getElementById("applicationAppliedDate").value =
+            application.appliedDate;
+
+        document.getElementById("applicationStatus").value =
+            application.status;
+
+        applicationEditMode = true;
                     ? "Application updated successfully!"
                     : "Application added successfully!"
             );
